@@ -17,10 +17,9 @@
 安裝我們的[csi](https://github.com/accelstor/kubernetes-afa-plugin)
 
 ``` shell
-    git clone https://github.com/accelstor/kubernetes-afa-plugin.git
-    kubectl apply -f kubernetes-afa-plugin/rbac-external-provisioner.yaml
-    kubectl apply -f kubernetes-afa-plugin/rbac-csi-snapshotter.yaml
-    kubectl apply -f kubernetes-afa-plugin/accelcsi.yaml
+    kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/rbac-external-provisioner.yaml
+    kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/rbac-csi-snapshotter.yaml
+    kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/accelcsi.yaml
 ```
 這樣csi就算安裝完成了
 

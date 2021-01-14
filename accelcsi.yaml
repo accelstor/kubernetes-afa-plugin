@@ -1,0 +1,146 @@
+# This YAML file shows how to deploy the CSI snapshotter together
+# with the hostpath CSI driver. It depends on the RBAC rules
+# from rbac-csi-snapshotter.yaml and rbac-external-provisioner.yaml.
+#
+# Because external-snapshotter and external-provisioner get
+# deployed in the same pod, we have to merge the permissions
+# for the provisioner into the service account. This is not
+# necessary when deploying separately.
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-snapshotter-provisioner-role
+subjects:
+  - kind: ServiceAccount
+    name: csi-snapshotter # from rbac.yaml
+    # replace with non-default namespace name
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: external-provisioner-runner # from rbac-external-provisioner.yaml
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-snapshotter-provisioner-role-cfg
+  # replace with non-default namespace name
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: csi-snapshotter # from rbac.yaml
+    # replace with non-default namespace name
+    namespace: default
+roleRef:
+  kind: Role
+  name: external-provisioner-cfg # from rbac-external-provisioner.yaml
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: csi-snapshotter
+  labels:
+    app: csi-snapshotter
+spec:
+  selector:
+    app: csi-snapshotter
+  ports:
+    - name: dummy
+      port: 12345
+
+---
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: csi-snapshotter
+spec:
+  serviceName: "csi-snapshotter"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-snapshotter
+  template:
+    metadata:
+      labels:
+        app: csi-snapshotter
+    spec:
+      serviceAccount: csi-snapshotter
+      containers:
+        - name: csi-provisioner
+          image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.2
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: csi-snapshotter
+          image: k8s.gcr.io/sig-storage/csi-snapshotter:v4.0.0
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+            - "--leader-election=false"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: csi-node-driver-registrar
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
+          args:
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
+          imagePullPolicy: Always
+          volumeMounts:
+          - mountPath: /csi
+            name: socket-dir
+          - mountPath: /registration
+            name: registration-dir
+        - name: accelcsi
+          image: registry.hsc.accelstor.local/kautism/accelcsi:latest
+          args:
+            - "-ip=$(AFA_IP)"
+            - "-key=$(AFA_KEY)"
+            - "-https=$(AFA_HTTPS)"
+            - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
+          env:
+            - name: AFA_IP
+              value: "10.146.6.205"
+            - name: AFA_KEY
+              value: "fa3fed9fceda15dd7960c3431c406f58848fd22f"
+            - name: AFA_HTTPS
+              value: "false"
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: KUBE_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+      volumes:
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi.accelstor.com/
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory

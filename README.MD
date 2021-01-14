@@ -19,8 +19,33 @@
 ``` shell
     kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/rbac-external-provisioner.yaml
     kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/rbac-csi-snapshotter.yaml
-    kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/accelcsi.yaml
 ```
+
+下載並指向AFA正確IP，填入正確AFATOKEN
+
+``` shell
+    curl https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/accelcsi.yaml
+    vim accelcsi.yaml
+```
+
+從[env](https://github.com/accelstor/kubernetes-afa-plugin/blob/main/accelcsi.yaml#L117)位置處開始編輯
+
+``` yaml
+          env:
+            - name: AFA_IP
+              value: "10.146.6.205"
+            - name: AFA_KEY
+              value: "fa3fed9fceda15dd7960c3431c406f58848fd22f"
+            - name: AFA_HTTPS
+              value: "false"
+```
+
+apply剛剛編輯好的檔案，csi plugin就會正確地把volume掛載
+
+``` shell
+kubectl apply -f accelcsi.yaml
+```
+
 這樣csi就算安裝完成了
 
 ## Usage

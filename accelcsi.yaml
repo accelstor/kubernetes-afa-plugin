@@ -6,6 +6,7 @@
 # deployed in the same pod, we have to merge the permissions
 # for the provisioner into the service account. This is not
 # necessary when deploying separately.
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,7 +52,6 @@ roleRef:
   kind: ClusterRole
   name: external-provisioner-runner # from rbac-external-provisioner.yaml
   apiGroup: rbac.authorization.k8s.io
-
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -99,10 +99,23 @@ spec:
       labels:
         app: csi-snapshotter
     spec:
+      hostNetwork: true
       serviceAccount: csi-snapshotter
       containers:
         - name: csi-provisioner
           image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.2
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: csi-attacher
+          image: k8s.gcr.io/sig-storage/csi-attacher:v3.1.0
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -131,7 +144,7 @@ spec:
           args:
             - --csi-address=/csi/csi.sock
             - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
           - mountPath: /csi
             name: socket-dir
@@ -146,9 +159,9 @@ spec:
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
           env:
             - name: AFA_IP
-              value: "10.146.6.205"
+              value: "172.16.100.205"
             - name: AFA_KEY
-              value: "fa3fed9fceda15dd7960c3431c406f58848fd22f"
+              value: "4ebbeed9f4c2deeb01faa8b37d5498874b725948"
             - name: AFA_HTTPS
               value: "false"
             - name: KUBE_NODE_NAME
@@ -165,6 +178,14 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
+            - name: modules
+              mountPath: "/lib/modules"
+            - name: dev
+              mountPath: "/dev"
+            - name: run
+              mountPath: "/run"
+            - name: k8spath
+              mountPath: /var/lib/kubelet/
       volumes:
         - name: socket-dir
           hostPath:
@@ -174,3 +195,16 @@ spec:
           hostPath:
             path: /var/lib/kubelet/plugins_registry/
             type: Directory
+        - name: k8spath
+          hostPath:
+            path: /var/lib/kubelet/
+            type: Directory
+        - name: modules
+          hostPath:
+            path: "/lib/modules"
+        - name: run
+          hostPath:
+            path: "/run"
+        - name: dev
+          hostPath:
+            path: "/dev"

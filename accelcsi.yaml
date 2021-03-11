@@ -178,14 +178,26 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
-            - name: modules
-              mountPath: "/lib/modules"
-            - name: dev
-              mountPath: "/dev"
-            - name: run
-              mountPath: "/run"
             - name: k8spath
               mountPath: /var/lib/kubelet/
+            - name: modules
+              mountPath: /lib/modules
+            - name: dev
+              mountPath: /dev
+            - name: iscsiadm
+              mountPath: /host/usr/sbin/iscsiadm
+            - name: lib64
+              mountPath: /host/lib64
+            - name: iscsi-run-lock
+              mountPath: /host/run/lock/iscsi
+            - name: iscsi-var-lock
+              mountPath: /host/var/lock/iscsi
+            - name: iscsi-lib
+              mountPath: /host/var/lib/iscsi
+            - name: iscsi-config
+              mountPath: /host/etc/iscsi/
+            - name: sys
+              mountPath: /host/sys
       volumes:
         - name: socket-dir
           hostPath:
@@ -201,10 +213,28 @@ spec:
             type: Directory
         - name: modules
           hostPath:
-            path: "/lib/modules"
-        - name: run
+            path: /lib/modules
+        - name: iscsiadm
           hostPath:
-            path: "/run"
+            path: /usr/sbin/iscsiadm
+        - name: lib64
+          hostPath:
+            path: /lib64
+        - name: iscsi-run-lock
+          hostPath:
+            path: /run/lock/iscsi
+        - name: iscsi-var-lock
+          hostPath:
+            path: /var/lock/iscsi
+        - name: iscsi-lib
+          hostPath:
+            path: /var/lib/iscsi
+        - name: iscsi-config
+          hostPath:
+            path: /etc/iscsi/
+        - name: sys
+          hostPath:
+            path: /sys
         - name: dev
           hostPath:
-            path: "/dev"
+            path: /dev

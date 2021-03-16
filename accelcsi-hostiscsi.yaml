@@ -90,20 +90,8 @@ spec:
             name: socket-dir
           - mountPath: /registration
             name: registration-dir
-        - name: iscsid
-          image: quay.io/accelstor/accelcsi:latest
-          command: ["/sbin/iscsid", "-f"]
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - name: modules
-              mountPath: /lib/modules
-            - name: run
-              mountPath: /run
-            - name: dev
-              mountPath: /dev
         - name: accelcsi
-          image: registry.hsc.accelstor.local/kautism/accelcsi:latest
+          image: quay.io/accelstor/accelcsi:latest
           args:
             - "-ip=$(AFA_IP)"
             - "-key=$(AFA_KEY)"
@@ -127,9 +115,6 @@ spec:
           imagePullPolicy: Always
           securityContext:
             privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
@@ -140,16 +125,28 @@ spec:
               mountPath: /lib/modules
             - name: dev
               mountPath: /dev
-            - name: run
-              mountPath: /run
+            - name: iscsiadm
+              mountPath: /host/usr/sbin/iscsiadm
+            - name: lib64
+              mountPath: /host/lib64
+            - name: iscsi-run-lock
+              mountPath: /host/run/lock/iscsi
+            - name: iscsi-var-lock
+              mountPath: /host/var/lock/iscsi
+            - name: iscsi-lib
+              mountPath: /host/var/lib/iscsi
+            - name: iscsi-config
+              mountPath: /host/etc/iscsi/
+            - name: sys
+              mountPath: /host/sys
       volumes:
         - name: socket-dir
           hostPath:
-            path: /var/lib/kubelet/plugins/csi.accelstor.com
+            path: /var/lib/kubelet/plugins/csi.accelstor.com/
             type: DirectoryOrCreate
         - name: registration-dir
           hostPath:
-            path: /var/lib/kubelet/plugins_registry
+            path: /var/lib/kubelet/plugins_registry/
             type: Directory
         - name: pods
           hostPath:
@@ -159,9 +156,29 @@ spec:
           hostPath:
             path: /lib/modules
             type: Directory
+        - name: iscsiadm
+          hostPath:
+            path: /usr/sbin/iscsiadm
+            type: File
+        - name: lib64
+          hostPath:
+            path: /lib64
+            type: Directory
+        - name: iscsi-run-lock
+          hostPath:
+            path: /run/lock/iscsi
+        - name: iscsi-var-lock
+          hostPath:
+            path: /var/lock/iscsi
+        - name: iscsi-lib
+          hostPath:
+            path: /var/lib/iscsi
+        - name: iscsi-config
+          hostPath:
+            path: /etc/iscsi/
+        - name: sys
+          hostPath:
+            path: /sys
         - name: dev
           hostPath:
             path: /dev
-        - name: run
-          hostPath:
-            path: /run

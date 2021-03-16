@@ -1,0 +1,49 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: sc.csi.accelstor.com
+provisioner: csi.accelstor.com
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1.csi.accelstor.com
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: sc.csi.accelstor.com # defined in csi-setup.yaml
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shell-demo
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - csi-accelstor
+        topologyKey: "kubernetes.io/hostname"
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: shared-data
+    persistentVolumeClaim:
+      claimName: pvc1.csi.accelstor.com # defined in csi-pvs.yaml

@@ -103,7 +103,7 @@ spec:
             - name: dev
               mountPath: /dev
         - name: accelcsi
-          image: registry.hsc.accelstor.local/kautism/accelcsi:latest
+          image: quay.io/accelstor/accelcsi:latest
           args:
             - "-ip=$(AFA_IP)"
             - "-key=$(AFA_KEY)"

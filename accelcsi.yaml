@@ -43,7 +43,7 @@ spec:
               mountPath: /csi
       containers:
         - name: csi-provisioner
-          image: k8s.gcr.io/sig-storage/csi-provisioner:v2.0.2
+          image: quay.io/k8scsi/csi-provisioner:v2.0.2
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -55,7 +55,7 @@ spec:
             - name: socket-dir
               mountPath: /csi
         - name: csi-attacher
-          image: k8s.gcr.io/sig-storage/csi-attacher:v3.1.0
+          image: quay.io/k8scsi/csi-attacher:v3.1.0
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -67,7 +67,7 @@ spec:
             - name: socket-dir
               mountPath: /csi
         - name: csi-snapshotter
-          image: k8s.gcr.io/sig-storage/csi-snapshotter:v4.0.0
+          image: quay.io/k8scsi/csi-snapshotter:v4.0.0
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -80,7 +80,7 @@ spec:
             - name: socket-dir
               mountPath: /csi
         - name: csi-node-driver-registrar
-          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.0.1
+          image: quay.io/k8scsi/csi-node-driver-registrar:v2.0.1
           args:
             - --csi-address=/csi/csi.sock
             - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.accelstor.com/csi.sock

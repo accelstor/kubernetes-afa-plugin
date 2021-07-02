@@ -1,0 +1,8 @@
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshot
+metadata:
+  name: pvc1-snapshot
+spec:
+  volumeSnapshotClassName: snapclass.csi.accelstor.com
+  source:
+    persistentVolumeClaimName: pvc1.csi.accelstor.com

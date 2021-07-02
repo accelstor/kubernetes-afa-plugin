@@ -176,6 +176,65 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
 
 ![機器狀況](images/1.PNG)
 
+## 備份與還原
+
+現在您可以使用kubernetes來管理您的AFA snapshot，只需要簡單的yaml即可。
+
+### 備份
+
+延續上個範例，假設我們想對`pvc1.csi.accelstor.com`這個pvc做snapshot，首先，您必須先創建一個自定義的VolumeSnapshotClass
+
+```
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: snapclass.csi.accelstor.com
+driver: csi.accelstor.com
+deletionPolicy: Delete
+parameters:
+```
+
+使用該VolumeSnapshotClass來創建一個全新的snapshot。由於SnapshotClass內已指定driver為我們的csi，故創建的訊息會被傳遞至csi內並由csi創建。
+
+```
+apiVersion: snapshot.storage.k8s.io/v1beta1
+kind: VolumeSnapshot
+metadata:
+  name: pvc1-snapshot
+spec:
+  volumeSnapshotClassName: snapclass.csi.accelstor.com
+  source:
+    persistentVolumeClaimName: pvc1.csi.accelstor.com
+```
+
+此時您應該可在snapshot頁面見到snapshot已被創建
+
+![snapshot](images/2.PNG)
+
+### 還原
+
+還原也相當簡單，您只要指定dataSource為剛剛您命名的`pvc1-snapshot`，這樣kubernetes自然知道從何處還原您的volume。
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1-restore
+spec:
+  storageClassName: sc.csi.accelstor.com
+  dataSource:
+    name: pvc1-snapshot
+    kind: VolumeSnapshot
+    apiGroup: snapshot.storage.k8s.io
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+storage為必填項目，請勿任意調整以免造成未知錯誤。
+
 ## 親和性設定
 
 當您使用本設定檔在多個node的環境中，replicas小於目標node數有可能導致生成的pod沒有在擁有csi功能的node上，此時你會希望設定親和性只讓特定pod生成在特定node內。
@@ -202,7 +261,6 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
 ## iscsi設定
 
 範例`accelcsi.yaml`是使用內部iscsi，可能會與node本身的iscsi發生衝突，若您希望使用host的iscsid來進行管理，請參照`accelcsi-hostiscsi.yaml`，他會指引您使用node host的iscsi物件。
-
 
 ## 備註
 

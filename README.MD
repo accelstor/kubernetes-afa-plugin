@@ -1,5 +1,15 @@
 # 如何在kubernetes安裝accelcsi
 
+## 版本定義
+
+Kubernetes 1.20+ 能獲得最好的CSI體驗
+
+當您的版本介於1.17 - 1.20，請更換第一步驟的`external-snapshotter/client/config/crd`為`https://github.com/kubernetes-csi/external-snapshotter/tree/release-3.0/client/config/crd`
+
+低於1.17的版本，請參考[feature-gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)來開啟功能，但由於在1.17內csi諸多功能處於Beta或Alpha階段，我們並不能保證CSI的運行
+
+低於1.12版本將無法使用csi
+
 ## Setup
 
 ### Step 1

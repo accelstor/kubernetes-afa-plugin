@@ -60,6 +60,29 @@ kubectl apply -f accelcsi.yaml
 
 這樣csi就算安裝完成了
 
+#### 機器是HA的狀況
+
+當您的機器飾H系列，請移除ip2前方的#符號，並填上正確的IP
+
+```yaml
+            - "-ip=$(AFA_IP)"
+            #- "-ip2=$(AFA_IP2)" #Only set in H series
+```
+
+``` yaml
+          env:
+            - name: AFA_IP
+              value: "10.146.6.205"
+            - name: AFA_IP2
+              value: "10.146.6.105" #Only set in H series
+            - name: AFA_KEY
+              value: "fa3fed9fceda15dd7960c3431c406f58848fd22f"
+            - name: AFA_HTTPS
+              value: "false"
+```
+
+其餘設定與P系列相同
+
 ## Usage
 
 在實際將volume分配給pod前，我們須先使用csi plugin來create pvc，以下範例分別分配出1G、10G、40G大小的空間
@@ -244,25 +267,6 @@ spec:
 ```
 
 storage為必填項目，請勿任意調整以免造成未知錯誤。
-
-## 親和性設定
-
-當您使用本設定檔在多個node的環境中，replicas小於目標node數有可能導致生成的pod沒有在擁有csi功能的node上，此時你會希望設定親和性只讓特定pod生成在特定node內。
-
-```
-  affinity:
-    podAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-      - labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - csi-accelstor
-        topologyKey: "kubernetes.io/hostname"
-```
-
-將該段落加入至pod內，pod就只會在擁有csi的node運行。
 
 ## 擴展設定
 

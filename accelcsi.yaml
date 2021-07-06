@@ -1,16 +1,16 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: csi-accelstor
+  name: csi-controller-accelstor
 spec:
   selector:
     matchLabels:
-      app: csi-accelstor
+      app: csi-controller-accelstor
   replicas: 1
   template:
     metadata:
       labels:
-        app: csi-accelstor
+        app: csi-controller-accelstor
     spec:
       affinity:
         nodeAffinity:
@@ -79,41 +79,21 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
-        - name: csi-node-driver-registrar
-          image: quay.io/k8scsi/csi-node-driver-registrar:v2.0.1
-          args:
-            - --csi-address=/csi/csi.sock
-            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
-          imagePullPolicy: IfNotPresent
-          volumeMounts:
-          - mountPath: /csi
-            name: socket-dir
-          - mountPath: /registration
-            name: registration-dir
-        - name: iscsid
-          image: quay.io/accelstor/accelcsi:latest
-          command: ["/sbin/iscsid", "-f"]
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - name: modules
-              mountPath: /lib/modules
-            - name: run
-              mountPath: /run
-            - name: dev
-              mountPath: /dev
         - name: accelcsi
           image: quay.io/accelstor/accelcsi:latest
           args:
             - "-ip=$(AFA_IP)"
+            #- "-ip2=$(AFA_IP)2" #Only set in H series
             - "-key=$(AFA_KEY)"
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
           env:
             - name: AFA_IP
-              value: "10.146.6.103"
+              value: "10.146.6.104"
+            - name: AFA_IP2
+              value: "10.146.6.105" #Only set in H series
             - name: AFA_KEY
-              value: "47b333580f8cba0662835c149492887e12580735"
+              value: "c892ce6663c0779fb6883c0b7e111b9deed1b6c4"
             - name: AFA_HTTPS
               value: "false"
             - name: KUBE_NODE_NAME
@@ -146,6 +126,141 @@ spec:
         - name: socket-dir
           hostPath:
             path: /var/lib/kubelet/plugins/csi.accelstor.com
+            type: DirectoryOrCreate
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry
+            type: Directory
+        - name: pods
+          hostPath:
+            path: /var/lib/kubelet/pods
+            type: Directory
+        - name: modules
+          hostPath:
+            path: /lib/modules
+            type: Directory
+        - name: dev
+          hostPath:
+            path: /dev
+        - name: run
+          hostPath:
+            path: /run
+
+---
+
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: csi-accelstor-node
+spec:
+  selector:
+    matchLabels:
+      app: csi-accelstor-node
+  template:
+    metadata:
+      labels:
+        app: csi-accelstor-node
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - csi-accelstor
+            topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        "kubernetes.io/os": linux
+      hostNetwork: true
+      serviceAccount: csi-accelstor
+      initContainers:
+        - name: init-csi
+          image: quay.io/accelstor/accelcsi:latest
+          command: ["/bin/rm", "-rf", "/csi/csi.sock"]
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+      containers:
+        - name: csi-node-driver-registrar
+          image: quay.io/k8scsi/csi-node-driver-registrar:v2.0.1
+          args:
+            - --csi-address=/csi/csi.sock
+            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - mountPath: /csi
+            name: socket-dir
+          - mountPath: /registration
+            name: registration-dir
+        - name: iscsid
+          image: quay.io/accelstor/accelcsi:latest
+          command: ["/sbin/iscsid", "-f"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: modules
+              mountPath: /lib/modules
+            - name: run
+              mountPath: /run
+            - name: dev
+              mountPath: /dev
+        - name: accelcsi
+          image: quay.io/accelstor/accelcsi:latest
+          args:
+            - "-ip=$(AFA_IP)"
+            #- "-ip2=$(AFA_IP2)" #Only set in H series
+            - "-key=$(AFA_KEY)"
+            - "-https=$(AFA_HTTPS)"
+            - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
+          env:
+            - name: AFA_IP
+              value: "10.146.6.104"
+            - name: AFA_IP2
+              value: "10.146.6.105" #Only set in H series
+            - name: AFA_KEY
+              value: "c892ce6663c0779fb6883c0b7e111b9deed1b6c4"
+            - name: AFA_HTTPS
+              value: "false"
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: KUBE_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+            allowPrivilegeEscalation: true
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+            - name: pods
+              mountPath: /var/lib/kubelet/pods
+              mountPropagation: "Bidirectional"
+            - name: modules
+              mountPath: /lib/modules
+            - name: dev
+              mountPath: /dev
+            - name: run
+              mountPath: /run
+      volumes:
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi-node.accelstor.com
             type: DirectoryOrCreate
         - name: registration-dir
           hostPath:

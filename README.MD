@@ -36,7 +36,7 @@ Kubernetes 1.20+ 能獲得最好的CSI體驗
 下載並指向AFA正確IP，填入正確AFATOKEN
 
 ``` shell
-    curl https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/accelcsi.yaml
+    curl -LO https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/accelcsi.yaml
     vim accelcsi.yaml
 ```
 

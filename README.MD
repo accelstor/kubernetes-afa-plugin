@@ -38,6 +38,11 @@ blacklist {
 
 上面範例是將sda設定為黑名單(系統開機碟)並將AccelStor的硬碟設為例外，實際情況請依照當時機器設定為準
 
+``` bash
+systemctl start multipathd
+systemctl enable multipathd
+```
+
 
 ### Step 1
 

@@ -10,6 +10,14 @@ Kubernetes 1.20+ 能獲得最好的CSI體驗
 
 低於1.12版本將無法使用csi
 
+
+Feature               | Mini Support version | Compatible Version
+----------------------|----------------------|-------------------
+[CSI Snapshotter](https://github.com/kubernetes-csi/external-snapshotter)       | 1.20                 | 1.20
+[CSI Resizer](https://github.com/kubernetes-csi/external-resizer)           | 1.16                 | 1.20
+[CSI provisioner](https://github.com/kubernetes-csi/external-provisioner)       | 1.17                 | 1.21
+[Node Driver Registrar](https://github.com/kubernetes-csi/node-driver-registrar) | 1.13                 | *
+
 ## Setup
 
 ### Setp 0
@@ -62,6 +70,7 @@ systemctl enable multipathd
     kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/rbac-external-provisioner.yaml
     kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/rbac-csi-snapshotter.yaml
     kubectl apply -f https://raw.githubusercontent.com/kubernetes-csi/external-attacher/master/deploy/kubernetes/rbac.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes-csi/external-resizer/master/deploy/kubernetes/rbac.yaml
     kubectl apply -f https://raw.githubusercontent.com/accelstor/kubernetes-afa-plugin/main/serviceaccount.yaml
 ```
 

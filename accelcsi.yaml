@@ -21,15 +21,6 @@ spec:
                 operator: In
                 values:
                 - linux
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - csi-accelstor
-            topologyKey: "kubernetes.io/hostname"
       nodeSelector:
         "kubernetes.io/os": linux
       hostNetwork: true
@@ -68,6 +59,19 @@ spec:
               mountPath: /csi
         - name: csi-snapshotter
           image: quay.io/k8scsi/csi-snapshotter:v4.0.0
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+            - "--leader-election=false"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: csi-resizer
+          image: gcr.io/k8s-staging-sig-storage/csi-resizer:canary
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"

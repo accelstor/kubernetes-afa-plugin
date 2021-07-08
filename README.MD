@@ -12,6 +12,33 @@ Kubernetes 1.20+ 能獲得最好的CSI體驗
 
 ## Setup
 
+### Setp 0
+
+設定所有node的multipath，請先在所有目標機器上安裝multipath，並設定本公司的iscsi disk為例外
+
+``` bash
+yum install device-mapper-multipath -y
+/sbin/mpathconf --enable
+```
+
+編輯 /etc/multipath.conf
+
+``` 
+blacklist_exceptions {
+        device {
+                vendor "AStor"
+        }
+}
+
+blacklist {
+        devnode "^sda$"
+}
+
+```
+
+上面範例是將sda設定為黑名單(系統開機碟)並將AccelStor的硬碟設為例外，實際情況請依照當時機器設定為準
+
+
 ### Step 1
 
 先clone [external-snapshotter](https://github.com/kubernetes-csi/external-snapshotter.git)後，執行安裝，請注意，本命令每個cluster只需一次
@@ -267,10 +294,6 @@ spec:
 ```
 
 storage為必填項目，請勿任意調整以免造成未知錯誤。
-
-## 擴展設定
-
-您可以將replicas拓展至任意數字n(n < node數)，或者改寫成daemonset，但使用複數擴展時，請確保使用本公司最新版本的AFA，它們具有API層面的lock可以避免意外發生。
 
 ## iscsi設定
 

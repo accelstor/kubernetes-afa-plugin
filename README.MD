@@ -143,19 +143,15 @@ kubectl apply -f accelcsi.yaml
 
 ## Usage
 
+使用前必須先建立StorageClass，我們已經準備了一個範例，實際情況請依需求修改
+
+```
+kubectl apply -f storageclass.yaml
+```
+
 在實際將volume分配給pod前，我們須先使用csi plugin來create pvc，以下範例分別分配出1G、10G、40G大小的空間
 
 ``` yaml
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: sc.csi.accelstor.com
-provisioner: csi.accelstor.com
-reclaimPolicy: Delete
-volumeBindingMode: Immediate
-
----
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

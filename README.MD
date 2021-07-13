@@ -1,26 +1,33 @@
 # 如何在kubernetes安裝accelcsi
 
+## Outline
+
 ## 版本定義
 
 Kubernetes 1.20+ 能獲得最好的CSI體驗
 
 當您的版本介於1.17 - 1.20，請更換第一步驟的`external-snapshotter/client/config/crd`為`https://github.com/kubernetes-csi/external-snapshotter/tree/release-3.0/client/config/crd`
 
-低於1.17的版本，請參考[feature-gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)來開啟功能，但由於在1.17內csi諸多功能處於Beta或Alpha階段，我們並不能保證CSI的運行
+低於1.17的版本，請參考[feature-gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/)來開啟功能，但由於在1.17內csi諸多功能處於Beta或Alpha階段，我們並不能保證CSI的運行。關於任何1.17以下的錯誤或問題，本guide沒有辦法提供幫助。
 
 低於1.12版本將無法使用csi
 
+關於各csi功能最低需求版本如下：
 
-Feature               | Mini Support version | Compatible Version
-----------------------|----------------------|-------------------
-[CSI Snapshotter](https://github.com/kubernetes-csi/external-snapshotter)       | 1.20                 | 1.20
-[CSI Resizer](https://github.com/kubernetes-csi/external-resizer)           | 1.16                 | 1.20
-[CSI provisioner](https://github.com/kubernetes-csi/external-provisioner)       | 1.17                 | 1.21
-[Node Driver Registrar](https://github.com/kubernetes-csi/node-driver-registrar) | 1.13                 | *
+Feature                                                                                       | Mini Support version | Compatible Version
+----------------------------------------------------------------------------------------------|----------------------|-------------------
+[CSI Snapshotter 4.0](https://github.com/kubernetes-csi/external-snapshotter)                 | 1.20                 | 1.20
+[CSI Snapshotter 3.0](https://github.com/kubernetes-csi/external-snapshotter/tree/release-3.0)| 1.17                 | 1.17
+[CSI Resizer](https://github.com/kubernetes-csi/external-resizer)                             | 1.16                 | 1.20
+[CSI provisioner](https://github.com/kubernetes-csi/external-provisioner)                     | 1.17                 | 1.21
+[Node Driver Registrar](https://github.com/kubernetes-csi/node-driver-registrar)              | 1.13                 | *
+
 
 ## Setup
 
-### Setp 0
+### 環境設定
+
+#### Multipath
 
 設定所有node的multipath，請先在所有目標機器上安裝multipath，並設定本公司的iscsi disk為例外
 
@@ -51,6 +58,14 @@ systemctl start multipathd
 systemctl enable multipathd
 ```
 
+#### Iscsi
+
+筆者建議使用內部的iscsi，所以請關閉iscsi服務
+
+``` bash
+systemctl stop iscsid
+systemctl disable iscsid.socket
+```
 
 ### Step 1
 
@@ -61,6 +76,8 @@ systemctl enable multipathd
     kubectl create -f external-snapshotter/client/config/crd
     kubectl create -f external-snapshotter/deploy/kubernetes/snapshot-controller
 ```
+
+如果你低於1.20版本，那麼release-3.0很適合你。
 
 ### Step 2
 
@@ -311,15 +328,9 @@ storage為必填項目，請勿任意調整以免造成未知錯誤。
 
 ## iscsi設定
 
-範例`accelcsi.yaml`是使用內部iscsi，可能會與node本身的iscsi發生衝突，若您希望使用host的iscsid來進行管理，請參照`accelcsi-hostiscsi.yaml`，他會指引您使用node host的iscsi物件。
+範例`accelcsi.yaml`是使用內部iscsi，可能會與node本身的iscsi發生衝突，若您希望使用host的iscsid來進行管理，請參照`accelcsi-hostiscsi.yaml`，它會指引您使用node host的iscsi物件。
 
 ## 備註
 
 - Fibre channel的機器目前不支援kubernetes的plugin支援
 - 你可能需要修改accelcsi.yaml的機器位置和token以適應自己的機器
-
-## rbac-csi-snapshotter.yaml
-https://github.com/kubernetes-csi/external-snapshotter/blob/master/deploy/kubernetes/csi-snapshotter/rbac-csi-snapshotter.yaml
-
-## rbac-external-provisioner.yaml
-https://github.com/kubernetes-csi/external-provisioner/blob/master/deploy/kubernetes/rbac.yaml

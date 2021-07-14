@@ -252,6 +252,9 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
+            - name: kubernetes-io-dir
+              mountPath: /var/lib/kubelet/plugins/kubernetes.io/
+              mountPropagation: "Bidirectional"
             - name: pods
               mountPath: /var/lib/kubelet/pods
               mountPropagation: "Bidirectional"
@@ -265,6 +268,10 @@ spec:
         - name: socket-dir
           hostPath:
             path: /var/lib/kubelet/plugins/csi-node.accelstor.com
+            type: DirectoryOrCreate
+        - name: kubernetes-io-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/kubernetes.io/
             type: DirectoryOrCreate
         - name: registration-dir
           hostPath:

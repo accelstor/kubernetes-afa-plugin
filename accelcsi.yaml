@@ -28,10 +28,13 @@ spec:
       initContainers:
         - name: init-csi
           image: quay.io/accelstor/accelcsi:latest
-          command: ["/bin/rm", "-rf", "/csi/csi.sock"]
+          command:
+            - /bin/mkdir -P /var/lib/kubelet/plugins/csi.accelstor.com
+            - /bin/rm -rf /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
+            - name: var-lib
+              mountPath: /var/lib/
+              mountPropagation: "Bidirectional"
       containers:
         - name: csi-provisioner
           image: quay.io/k8scsi/csi-provisioner:v2.0.2
@@ -40,11 +43,12 @@ spec:
             - "--csi-address=$(ADDRESS)"
           env:
             - name: ADDRESS
-              value: /csi/csi.sock
+              value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
+            - name: var-lib
+              mountPath: /var/lib/
+              mountPropagation: "Bidirectional"
         - name: csi-attacher
           image: quay.io/k8scsi/csi-attacher:v3.1.0
           args:
@@ -52,11 +56,12 @@ spec:
             - "--csi-address=$(ADDRESS)"
           env:
             - name: ADDRESS
-              value: /csi/csi.sock
+              value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
+            - name: var-lib
+              mountPath: /var/lib/
+              mountPropagation: "Bidirectional"
         - name: csi-snapshotter
           image: quay.io/k8scsi/csi-snapshotter:v4.0.0
           args:
@@ -65,11 +70,12 @@ spec:
             - "--leader-election=false"
           env:
             - name: ADDRESS
-              value: /csi/csi.sock
+              value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
+            - name: var-lib
+              mountPath: /var/lib/
+              mountPropagation: "Bidirectional"
         - name: csi-resizer
           image: gcr.io/k8s-staging-sig-storage/csi-resizer:canary
           args:
@@ -78,11 +84,12 @@ spec:
             - "--leader-election=false"
           env:
             - name: ADDRESS
-              value: /csi/csi.sock
+              value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           imagePullPolicy: IfNotPresent
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
+            - name: var-lib
+              mountPath: /var/lib/
+              mountPropagation: "Bidirectional"
         - name: accelcsi
           image: quay.io/accelstor/accelcsi:latest
           args:
@@ -91,6 +98,7 @@ spec:
             - "-key=$(AFA_KEY)"
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
+            - "-csi-address=$(ADDRESS)"
           env:
             - name: AFA_IP
               value: "10.146.6.104"
@@ -100,6 +108,8 @@ spec:
               value: "c892ce6663c0779fb6883c0b7e111b9deed1b6c4"
             - name: AFA_HTTPS
               value: "false"
+            - name: ADDRESS
+              value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -115,10 +125,8 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
-            - name: pods
-              mountPath: /var/lib/kubelet/pods
+            - name: var-lib
+              mountPath: /var/lib/
               mountPropagation: "Bidirectional"
             - name: modules
               mountPath: /lib/modules
@@ -127,17 +135,9 @@ spec:
             - name: run
               mountPath: /run
       volumes:
-        - name: socket-dir
+        - name: var-lib
           hostPath:
-            path: /var/lib/kubelet/plugins/csi.accelstor.com
-            type: DirectoryOrCreate
-        - name: registration-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins_registry
-            type: Directory
-        - name: pods
-          hostPath:
-            path: /var/lib/kubelet/pods
+            path: /var/lib/
             type: Directory
         - name: modules
           hostPath:
@@ -190,22 +190,26 @@ spec:
       initContainers:
         - name: init-csi
           image: quay.io/accelstor/accelcsi:latest
-          command: ["/bin/rm", "-rf", "/csi/csi.sock"]
+          command:
+            - /bin/mkdir -P /var/lib/kubelet/plugins/csi-node.accelstor.com
+            - /bin/rm -rf /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
+            - name: var-lib
+              mountPath: /var/lib/
+              mountPropagation: "Bidirectional"
       containers:
         - name: csi-node-driver-registrar
           image: quay.io/k8scsi/csi-node-driver-registrar:v2.0.1
           args:
-            - --csi-address=/csi/csi.sock
-            - --kubelet-registration-path=/var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
+            - --csi-address=$(ADDRESS)
+            - --kubelet-registration-path=$(ADDRESS)
           imagePullPolicy: IfNotPresent
+          env:
+            - name: ADDRESS
+              value: /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
           volumeMounts:
-          - mountPath: /csi
-            name: socket-dir
-          - mountPath: /registration
-            name: registration-dir
+            - name: var-lib
+              mountPath: /var/lib/
         - name: iscsid
           image: quay.io/accelstor/accelcsi:latest
           command: ["/sbin/iscsid", "-f"]
@@ -226,6 +230,7 @@ spec:
             - "-key=$(AFA_KEY)"
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
+            - "-csi-address=$(ADDRESS)"
           env:
             - name: AFA_IP
               value: "10.146.6.104"
@@ -235,6 +240,8 @@ spec:
               value: "c892ce6663c0779fb6883c0b7e111b9deed1b6c4"
             - name: AFA_HTTPS
               value: "false"
+            - name: ADDRESS
+              value: /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -250,13 +257,8 @@ spec:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
           volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
-            - name: kubernetes-io-dir
-              mountPath: /var/lib/kubelet/plugins/kubernetes.io/
-              mountPropagation: "Bidirectional"
-            - name: pods
-              mountPath: /var/lib/kubelet/pods
+            - name: var-lib
+              mountPath: /var/lib/
               mountPropagation: "Bidirectional"
             - name: modules
               mountPath: /lib/modules
@@ -265,21 +267,9 @@ spec:
             - name: run
               mountPath: /run
       volumes:
-        - name: socket-dir
+        - name: var-lib
           hostPath:
-            path: /var/lib/kubelet/plugins/csi-node.accelstor.com
-            type: DirectoryOrCreate
-        - name: kubernetes-io-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins/kubernetes.io/
-            type: DirectoryOrCreate
-        - name: registration-dir
-          hostPath:
-            path: /var/lib/kubelet/plugins_registry
-            type: Directory
-        - name: pods
-          hostPath:
-            path: /var/lib/kubelet/pods
+            path: /var/lib/
             type: Directory
         - name: modules
           hostPath:

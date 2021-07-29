@@ -34,7 +34,6 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-              mountPropagation: "Bidirectional"
       containers:
         - name: csi-provisioner
           image: quay.io/k8scsi/csi-provisioner:v2.0.2
@@ -48,7 +47,6 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-              mountPropagation: "Bidirectional"
         - name: csi-attacher
           image: quay.io/k8scsi/csi-attacher:v3.1.0
           args:
@@ -61,7 +59,6 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-              mountPropagation: "Bidirectional"
         - name: csi-snapshotter
           image: quay.io/k8scsi/csi-snapshotter:v4.0.0
           args:
@@ -75,7 +72,6 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-              mountPropagation: "Bidirectional"
         - name: csi-resizer
           image: gcr.io/k8s-staging-sig-storage/csi-resizer:canary
           args:
@@ -89,7 +85,6 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-              mountPropagation: "Bidirectional"
         - name: accelcsi
           image: quay.io/accelstor/accelcsi:latest
           args:
@@ -196,7 +191,6 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-              mountPropagation: "Bidirectional"
       containers:
         - name: csi-node-driver-registrar
           image: quay.io/k8scsi/csi-node-driver-registrar:v2.0.1

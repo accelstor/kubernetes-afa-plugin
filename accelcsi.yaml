@@ -206,8 +206,8 @@ spec:
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
-          - mountPath: /registration
-            name: registration-dir
+            - mountPath: /registration
+              name: registration-dir
         - name: iscsid
           image: quay.io/accelstor/accelcsi:latest
           command: ["/sbin/iscsid", "-f"]

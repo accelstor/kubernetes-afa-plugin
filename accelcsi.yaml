@@ -28,9 +28,10 @@ spec:
       initContainers:
         - name: init-csi
           image: quay.io/accelstor/accelcsi:latest
-          command:
-            - /bin/mkdir -P /var/lib/kubelet/plugins/csi.accelstor.com
-            - /bin/rm -rf /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
+          command: ["/bin/bash", "-c"]
+          args:
+            - /bin/mkdir -P /var/lib/kubelet/plugins/csi.accelstor.com;
+              /bin/rm -rf /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/
@@ -185,9 +186,10 @@ spec:
       initContainers:
         - name: init-csi
           image: quay.io/accelstor/accelcsi:latest
-          command:
-            - /bin/mkdir -P /var/lib/kubelet/plugins/csi-node.accelstor.com
-            - /bin/rm -rf /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
+          command: ["/bin/bash", "-c"]
+          args:
+            - /bin/mkdir -P /var/lib/kubelet/plugins/csi-node.accelstor.com;
+              /bin/rm -rf /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
           volumeMounts:
             - name: var-lib
               mountPath: /var/lib/

@@ -130,6 +130,9 @@ spec:
               mountPath: /dev
             - name: run
               mountPath: /run
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
       volumes:
         - name: var-lib
           hostPath:
@@ -145,6 +148,9 @@ spec:
         - name: run
           hostPath:
             path: /run
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
 
 ---
 
@@ -264,6 +270,9 @@ spec:
               mountPath: /dev
             - name: run
               mountPath: /run
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
       volumes:
         - name: registration-dir
           hostPath:
@@ -283,3 +292,6 @@ spec:
         - name: run
           hostPath:
             path: /run
+        - name: localtime
+          hostPath:
+            path: /etc/localtime

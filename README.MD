@@ -328,5 +328,5 @@ storage為必填項目，請勿任意調整以免造成未知錯誤。
 
 ## 備註
 
-- Fibre channel的機器目前不支援kubernetes的plugin支援
+- Fibre channel的機器目前不受kubernetes的plugin支援
 - 你可能需要修改accelcsi.yaml的機器位置和token以適應自己的機器

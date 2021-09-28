@@ -120,7 +120,7 @@ kubectl apply -f accelcsi.yaml
 
 #### 機器是HA的狀況
 
-當您的機器飾H系列，請移除ip2前方的#符號，並填上正確的IP
+當您的機器是H系列，請移除ip2前方的#符號，並填上正確的IP
 
 ```yaml
             - "-ip=$(AFA_IP)"

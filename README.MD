@@ -30,6 +30,7 @@ Feature                                                                         
 #### Multipath
 
 設定所有node的multipath，請先在所有目標機器上安裝multipath，並設定本公司的iscsi disk為例外
+不打算使用iscsi的使用者，或者並非HA系列的使用者可以跳過此步驟
 
 ``` bash
 yum install device-mapper-multipath -y
@@ -60,11 +61,27 @@ systemctl enable multipathd
 
 #### Iscsi
 
-筆者建議使用內部的iscsi，所以請關閉iscsi服務
+筆者建議使用內部的iscsi，所以請關閉iscsi服務，不打算使用iscsi的使用者可以跳過此步驟
 
 ``` bash
 systemctl stop iscsid
 systemctl disable iscsid.socket
+```
+
+### NFS
+
+HA系列請先設置virtual ip
+
+![virtualip](images/virtualip.PNG)
+
+必須設定ipv4 IP且確定kubernetes每一個node都能正確連上目的port。您可以使用其他工具如ping/curl/netcat來測試該virtual ip是否正確工作，如果沒有請檢查機器後方的網路孔是否與kubernetes叢集接到同一網路內。請注意每一個data port並不是互通的，倘若在data port 1上設置正確的virtual ip，卻將網路線插在port 2，那麼網路是不會通的。
+
+確定virtual ip可以工作後，請修改accelcsi.yaml並將ip1替換成virtual ip，在本例中，不需要設定IP2。
+
+```
+          env:
+            - name: AFA_IP
+              value: "10.146.6.104"
 ```
 
 ### Step 1

@@ -137,7 +137,7 @@ kubectl apply -f accelcsi.yaml
 
 #### 機器是HA的狀況
 
-當您的機器飾H系列，請移除ip2前方的#符號，並填上正確的IP
+當您的機器是H系列，請移除ip2前方的#符號，並填上正確的IP
 
 ```yaml
             - "-ip=$(AFA_IP)"
@@ -345,5 +345,5 @@ storage為必填項目，請勿任意調整以免造成未知錯誤。
 
 ## 備註
 
-- Fibre channel的機器目前不支援kubernetes的plugin支援
+- Fibre channel的機器目前不受kubernetes的plugin支援
 - 你可能需要修改accelcsi.yaml的機器位置和token以適應自己的機器

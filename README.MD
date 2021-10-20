@@ -280,6 +280,38 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
 
 ![機器狀況](images/1.PNG)
 
+### 使用NFS
+
+NFS的volume不支援block mode，請勿在pod中使用block mode。
+
+以下是nfs的簡短範例：
+
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs.csi.accelstor.com
+provisioner: csi.accelstor.com
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+parameters:
+  type: nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1.csi.accelstor.com
+spec:
+  accessModes:
+  - ReadWriteOnce
+#  volumeMode: nfs
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName:  nfs.csi.accelstor.com # defined in csi-setup.yaml
+```
+
 ## 備份與還原
 
 現在您可以使用kubernetes來管理您的AFA snapshot，只需要簡單的yaml即可。

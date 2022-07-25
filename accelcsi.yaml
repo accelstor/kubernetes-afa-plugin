@@ -216,7 +216,7 @@ spec:
               name: registration-dir
         - name: iscsid
           image: quay.io/accelstor/accelcsi:latest
-          command: ["/sbin/iscsid", "-f"]
+          command: ["/usr/sbin/iscsid", "-f"]
           securityContext:
             privileged: true
           volumeMounts:

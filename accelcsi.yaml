@@ -91,6 +91,7 @@ spec:
           args:
             - "-ip=$(AFA_IP)"
             #- "-ip2=$(AFA_IP2)" #Only set in H series
+            #- "-virtualip=$(AFA_VIRTUALIP)"  #Set if you wanna use NFS with dataport
             - "-key=$(AFA_KEY)"
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
@@ -100,6 +101,8 @@ spec:
               value: "10.146.6.104"
             - name: AFA_IP2
               value: "10.146.6.105" #Only set in H series
+            - name: AFA_VIRTUALIP
+              value: "10.146.6.105" #Set if you wanna use NFS with dataport
             - name: AFA_KEY
               value: "c892ce6663c0779fb6883c0b7e111b9deed1b6c4"
             - name: AFA_HTTPS
@@ -231,6 +234,7 @@ spec:
           args:
             - "-ip=$(AFA_IP)"
             #- "-ip2=$(AFA_IP2)" #Only set in H series
+            #- "-virtualip=$(AFA_VIRTUALIP)"  #Set if you wanna use NFS with dataport
             - "-key=$(AFA_KEY)"
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
@@ -240,6 +244,8 @@ spec:
               value: "10.146.6.104"
             - name: AFA_IP2
               value: "10.146.6.105" #Only set in H series
+            - name: AFA_VIRTUALIP
+              value: "10.146.6.105" #Set if you wanna use NFS with dataport
             - name: AFA_KEY
               value: "c892ce6663c0779fb6883c0b7e111b9deed1b6c4"
             - name: AFA_HTTPS

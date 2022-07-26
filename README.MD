@@ -312,6 +312,24 @@ spec:
   storageClassName:  nfs.csi.accelstor.com # defined in csi-setup.yaml
 ```
 
+### NFS的virtual ip
+
+將本行的註解取消
+
+```
+            #- "-virtualip=$(AFA_VIRTUALIP)"  #Set if you wanna use NFS with dataport
+```
+
+然後對你要使用的dataport建立virtual ip
+
+```
+          env:
+            - name: AFA_VIRTUALIP
+              value: "10.146.6.104"
+```
+
+沒有vip功能的機台也可以直接填入data port，NFS會使用該port連線。HA版本也可以直接填入data port而不使用virtual ip，不過當服務機台進入R mode時會斷線。
+
 ## 備份與還原
 
 現在您可以使用kubernetes來管理您的AFA snapshot，只需要簡單的yaml即可。

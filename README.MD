@@ -135,6 +135,14 @@ HA系列請先設置virtual ip
               value: "false"
 ```
 
+如果你低於1.20版本，不要忘記將snapshotter更換成3.0.3版本
+
+``` patch
+        - name: csi-snapshotter
+-          image: quay.io/k8scsi/csi-snapshotter:v4.0.0
++          image: quay.io/k8scsi/csi-snapshotter:v3.0.3
+```
+
 apply剛剛編輯好的檔案，csi plugin就會正確地把volume掛載
 
 ``` shell

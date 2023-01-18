@@ -86,6 +86,8 @@ HA系列請先設置virtual ip
 
 ### Step 1
 
+**執行前請先注意版本**
+
 先clone [external-snapshotter](https://github.com/kubernetes-csi/external-snapshotter.git)後，執行安裝，請注意，本命令每個cluster只需一次
 
 ``` shell
@@ -95,6 +97,12 @@ HA系列請先設置virtual ip
 ```
 
 如果你低於1.20版本，那麼release-3.0很適合你。
+
+``` shell
+    git clone https://github.com/kubernetes-csi/external-snapshotter.git -b release-3.0
+    kubectl create -f external-snapshotter/client/config/crd
+    kubectl create -f external-snapshotter/deploy/kubernetes/snapshot-controller
+```
 
 ### Step 2
 

@@ -22,6 +22,11 @@ Feature                                                                         
 [CSI provisioner](https://github.com/kubernetes-csi/external-provisioner)                     | 1.17                 | 1.21
 [Node Driver Registrar](https://github.com/kubernetes-csi/node-driver-registrar)              | 1.13                 | *
 
+### 關於執行環境
+
+centos7的作業系統請使用centos7的tag`quay.io/accelstor/accelcsi:centos7`
+
+如果你的kubernetes是新舊混用，且因為歷史因素難以統一node環境，需為每個node設定tag並建立複數DaemonSet並設定nodeAffinity，以達到讓不同版本host自動對應版本csi
 
 ## Setup
 
@@ -141,6 +146,13 @@ HA系列請先設置virtual ip
         - name: csi-snapshotter
 -          image: quay.io/k8scsi/csi-snapshotter:v4.0.0
 +          image: quay.io/k8scsi/csi-snapshotter:v3.0.3
+```
+
+如果你是centos7架設的kubernetes，別忘了修改容器版本
+
+```patch
+-          - image: quay.io/accelstor/accelcsi:v407
++          - image: quay.io/accelstor/accelcsi:centos7
 ```
 
 apply剛剛編輯好的檔案，csi plugin就會正確地把volume掛載

@@ -27,7 +27,7 @@ spec:
       serviceAccount: csi-accelstor
       initContainers:
         - name: init-csi
-          image: quay.io/accelstor/accelcsi:v407
+          image: quay.io/accelstor/accelcsi:v4.0.7r1
           command: ["/bin/sh", "-c"]
           args:
             - /bin/mkdir -P /var/lib/kubelet/plugins/csi.accelstor.com;
@@ -87,7 +87,7 @@ spec:
             - name: var-lib
               mountPath: /var/lib/
         - name: accelcsi
-          image: quay.io/accelstor/accelcsi:v407
+          image: quay.io/accelstor/accelcsi:v4.0.7r1
           args:
             - "-ip=$(AFA_IP)"
             #- "-ip2=$(AFA_IP2)" #Only set in H series
@@ -96,6 +96,7 @@ spec:
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
             - "-csi-address=$(ADDRESS)"
+            #- "-csi-name=$(CSI_DRIVE_NAME)" #Set if you wanna use different driveName
           env:
             - name: AFA_IP
               value: "10.146.6.104"
@@ -109,6 +110,8 @@ spec:
               value: "false"
             - name: ADDRESS
               value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
+            - name: CSI_DRIVE_NAME
+              value: "csi.accelstor.com"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -194,7 +197,7 @@ spec:
       serviceAccount: csi-accelstor
       initContainers:
         - name: init-csi
-          image: quay.io/accelstor/accelcsi:v407
+          image: quay.io/accelstor/accelcsi:v4.0.7r1
           command: ["/bin/sh", "-c"]
           args:
             - /bin/mkdir -P /var/lib/kubelet/plugins/csi-node.accelstor.com;
@@ -217,8 +220,20 @@ spec:
               mountPath: /var/lib/
             - mountPath: /registration
               name: registration-dir
+        - name: iscsid
+          image: quay.io/accelstor/accelcsi:v4.0.7r1
+          command: ["/usr/sbin/iscsid", "-f"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: modules
+              mountPath: /lib/modules
+            - name: run
+              mountPath: /run
+            - name: dev
+              mountPath: /dev
         - name: accelcsi
-          image: quay.io/accelstor/accelcsi:v407
+          image: quay.io/accelstor/accelcsi:v4.0.7r1
           args:
             - "-ip=$(AFA_IP)"
             #- "-ip2=$(AFA_IP2)" #Only set in H series
@@ -227,6 +242,7 @@ spec:
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
             - "-csi-address=$(ADDRESS)"
+            #- "-csi-name=$(CSI_DRIVE_NAME)" #Set if you wanna use different driveName
           env:
             - name: AFA_IP
               value: "10.146.6.104"
@@ -240,6 +256,8 @@ spec:
               value: "false"
             - name: ADDRESS
               value: /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
+            - name: CSI_DRIVE_NAME
+              value: "csi.accelstor.com"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -267,7 +285,7 @@ spec:
             - name: localtime
               mountPath: /etc/localtime
               readOnly: true
-              
+
             - name: iscsiadm
               mountPath: /host/usr/sbin/iscsiadm
             - name: lib64

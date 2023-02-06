@@ -96,6 +96,7 @@ spec:
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
             - "-csi-address=$(ADDRESS)"
+            #- "-csi-name=$(CSI_DRIVE_NAME)" #Set if you wanna use different driveName
           env:
             - name: AFA_IP
               value: "10.146.6.104"
@@ -109,6 +110,8 @@ spec:
               value: "false"
             - name: ADDRESS
               value: /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
+            - name: CSI_DRIVE_NAME
+              value: "csi.accelstor.com"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -239,6 +242,7 @@ spec:
             - "-https=$(AFA_HTTPS)"
             - "-nodeid=$(KUBE_NODE_NAME),$(KUBE_POD_IP)"
             - "-csi-address=$(ADDRESS)"
+            #- "-csi-name=$(CSI_DRIVE_NAME)" #Set if you wanna use different driveName
           env:
             - name: AFA_IP
               value: "10.146.6.104"
@@ -252,6 +256,8 @@ spec:
               value: "false"
             - name: ADDRESS
               value: /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
+            - name: CSI_DRIVE_NAME
+              value: "csi.accelstor.com"
             - name: KUBE_NODE_NAME
               valueFrom:
                 fieldRef:

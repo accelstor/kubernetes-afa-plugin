@@ -46,6 +46,7 @@ yum install device-mapper-multipath -y
 
 ``` 
 blacklist_exceptions {
+        property "(SCSI_IDENT_|ID_WWN|ID_SERIAL)"
         device {
                 vendor "AStor"
         }

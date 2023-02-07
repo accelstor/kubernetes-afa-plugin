@@ -65,6 +65,10 @@ systemctl start multipathd
 systemctl enable multipathd
 ```
 
+##### 已知問題
+
+centos7.7以前的版本搭載multipath 0.4.9，會遇到[該bug](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=782488)，必須加入`ID_SERIAL`字段。其餘版本可放心使用`property "(SCSI_IDENT_|ID_WWN)"`
+
 #### Iscsi
 
 筆者建議使用內部的iscsi，所以請關閉iscsi服務，不打算使用iscsi的使用者可以跳過此步驟

@@ -75,7 +75,11 @@ centos7.7以前的版本搭載multipath 0.4.9，會遇到[該bug](https://bugs.d
 
 ``` bash
 systemctl stop iscsid
+systemctl stop iscsi
+systemctl stop iscsid.socket
+systemctl disable iscsid
 systemctl disable iscsid.socket
+systemctl disable iscsi
 ```
 
 ### NFS

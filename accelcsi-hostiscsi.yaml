@@ -27,7 +27,7 @@ spec:
       serviceAccount: csi-accelstor
       initContainers:
         - name: init-csi
-          image: quay.io/accelstor/accelcsi:v4.0.7r1
+          image: quay.io/accelstor/accelcsi:v4.0.7r2
           command: ["/bin/sh", "-c"]
           args:
             - /bin/mkdir -P /var/lib/kubelet/plugins/csi.accelstor.com;
@@ -87,7 +87,7 @@ spec:
             - name: var-lib
               mountPath: /var/lib/
         - name: accelcsi
-          image: quay.io/accelstor/accelcsi:v4.0.7r1
+          image: quay.io/accelstor/accelcsi:v4.0.7r2
           args:
             - "-ip=$(AFA_IP)"
             #- "-ip2=$(AFA_IP2)" #Only set in H series
@@ -197,7 +197,7 @@ spec:
       serviceAccount: csi-accelstor
       initContainers:
         - name: init-csi
-          image: quay.io/accelstor/accelcsi:v4.0.7r1
+          image: quay.io/accelstor/accelcsi:v4.0.7r2
           command: ["/bin/sh", "-c"]
           args:
             - /bin/mkdir -P /var/lib/kubelet/plugins/csi-node.accelstor.com;
@@ -220,20 +220,8 @@ spec:
               mountPath: /var/lib/
             - mountPath: /registration
               name: registration-dir
-        - name: iscsid
-          image: quay.io/accelstor/accelcsi:v4.0.7r1
-          command: ["/usr/sbin/iscsid", "-f"]
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - name: modules
-              mountPath: /lib/modules
-            - name: run
-              mountPath: /run
-            - name: dev
-              mountPath: /dev
         - name: accelcsi
-          image: quay.io/accelstor/accelcsi:v4.0.7r1
+          image: quay.io/accelstor/accelcsi:v4.0.7r2
           args:
             - "-ip=$(AFA_IP)"
             #- "-ip2=$(AFA_IP2)" #Only set in H series

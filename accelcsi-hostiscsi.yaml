@@ -286,6 +286,8 @@ spec:
               mountPath: /host/var/lib/iscsi
             - name: iscsi-config
               mountPath: /host/etc/iscsi/
+            - name: sys
+              mountPath: /host/sys
       volumes:
         - name: registration-dir
           hostPath:
@@ -305,6 +307,9 @@ spec:
         - name: run
           hostPath:
             path: /run
+        - name: sys
+          hostPath:
+            path: /sys
         - name: localtime
           hostPath:
             path: /etc/localtime

@@ -434,3 +434,4 @@ storage為必填項目，請勿任意調整以免造成未知錯誤。
 
 - Fibre channel的機器目前不受kubernetes的plugin支援
 - 你可能需要修改accelcsi.yaml的機器位置和token以適應自己的機器
+- 某些linux發行版不會自動load iscsi_tcp，你必須在執行accelcsi前modprobe iscsi_tcp，或者將iscsi_tcp加入到modprobe.conf or /etc/modprobe.d

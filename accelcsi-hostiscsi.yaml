@@ -30,7 +30,7 @@ spec:
           image: quay.io/accelstor/accelcsi:v4.0.7r2
           command: ["/bin/sh", "-c"]
           args:
-            - /bin/mkdir -P /var/lib/kubelet/plugins/csi.accelstor.com;
+            - /bin/mkdir -p /var/lib/kubelet/plugins/csi.accelstor.com;
               /bin/rm -rf /var/lib/kubelet/plugins/csi.accelstor.com/csi.sock
           volumeMounts:
             - name: var-lib
@@ -200,7 +200,7 @@ spec:
           image: quay.io/accelstor/accelcsi:v4.0.7r2
           command: ["/bin/sh", "-c"]
           args:
-            - /bin/mkdir -P /var/lib/kubelet/plugins/csi-node.accelstor.com;
+            - /bin/mkdir -p /var/lib/kubelet/plugins/csi-node.accelstor.com;
               /bin/rm -rf /var/lib/kubelet/plugins/csi-node.accelstor.com/csi.sock
           volumeMounts:
             - name: var-lib
